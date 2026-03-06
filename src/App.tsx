@@ -214,7 +214,7 @@ function App() {
                   टेलीग्राम चैनल
                 </span>{" "}
                 <br />
-                में ज्वाइन करें!
+                में जॉइन करें!
               </h1>
               
               {/* --- HERO BUTTON AREA (Fixed Animation & Full Width) --- */}
