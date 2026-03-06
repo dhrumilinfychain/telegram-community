@@ -230,7 +230,7 @@ function App() {
                   <img
                     alt="Hero Image"
                     className="w-full h-auto object-cover transform transition-transform duration-1000 group-hover:scale-105 opacity-100"
-                    src="../public/hero.png"
+                    src="/hero.png"
                   />
                 </div>
 
@@ -421,7 +421,7 @@ function App() {
 
                 <div className="hidden lg:block absolute -right-32 xl:-right-40 top-[55%] xl:top-[60%] -translate-y-1/2 w-32 xl:w-40 z-0 pointer-events-none">
                   <img
-                    src="../public/arrow.webp"
+                    src="/arrow.webp"
                     alt="Arrow"
                     className="w-full h-auto opacity-70 invert drop-shadow-[0_0_15px_rgba(0,212,255,0.4)] animate-arrow-flow"
                   />
