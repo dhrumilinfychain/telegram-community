@@ -243,7 +243,7 @@ function App() {
                   <img
                     alt="Hero Image"
                     className="w-full h-auto object-cover transform transition-transform duration-1000 group-hover:scale-105 opacity-100"
-                    src="/hero.webp"
+                    src="/hero.png"
                     fetchPriority="high"
                   />
                 </div>
