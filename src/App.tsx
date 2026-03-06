@@ -200,7 +200,7 @@ function App() {
         <section className="container mx-auto px-4 sm:px-6 pt-16 pb-20 md:pt-24 md:pb-32">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
             {/* Left Content Area (Text & Buttons) */}
-            <div className="lg:w-1/2 text-center lg:text-left">
+            <div  onClick={handleJoinClick} className="lg:w-1/2 text-center lg:text-left">
               <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary border border-primary/20 px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-6 sm:mb-8 shadow-[0_0_15px_rgba(0,149,255,0.2)]">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -414,7 +414,7 @@ function App() {
         <section className="container mx-auto pt-16 pb-24 sm:pb-32 px-4 sm:px-6 relative z-20">
           <div className="relative rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden bg-[#050a18] border border-white/5 shadow-2xl backdrop-blur-3xl group transition-all duration-500 hover:border-primary/40">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,149,255,0.08),transparent_50%)]"></div>
-            <div className="relative z-10 p-6 sm:p-10 md:p-14 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10">
+            <div  onClick={handleJoinClick} className="relative z-10 p-6 sm:p-10 md:p-14 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10">
               {/* Left Side (Text) */}
               <div className="lg:w-7/12 text-center lg:text-left relative w-full">
                 <h2 className="text-2xl sm:text-3xl md:text-5xl font-black mb-4 sm:mb-5 text-white relative z-10">
