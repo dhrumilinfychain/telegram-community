@@ -3,14 +3,6 @@ import "./App.css";
 import ReactPixel from "react-facebook-pixel";
 
 function App() {
-
-  // Initialize Facebook Pixel
-  const handleJoinClick = () => {
-    ReactPixel.track("Lead");
-    const telegramLink = import.meta.env.VITE_TELEGRAM_LINK;
-    window.open(telegramLink, "_blank");
-  };
-  
   // Live Crypto Ticker State
   const [tickerData, setTickerData] = useState([
     { id: "bitcoin", symbol: "BTC", price: 0, change: 0 },
@@ -21,10 +13,32 @@ function App() {
     { id: "binancecoin", symbol: "BNB", price: 0, change: 0 },
     { id: "arbitrum", symbol: "ARB", price: 0, change: 0 },
     { id: "matic-network", symbol: "MATIC", price: 0, change: 0 },
-    { id: "polkadot", symbol: "DOT", price: 0, change: 0 },
-    { id: "dogecoin", symbol: "DOGE", price: 0, change: 0 },
-    { id: "shiba-inu", symbol: "SHIB", price: 0, change: 0 },
   ]);
+
+  // --- NEW: INITIALIZE META (FACEBOOK) PIXEL ON PAGE LOAD ---
+  useEffect(() => {
+    const pixelId = import.meta.env.VITE_META_PIXEL_ID;
+    
+    if (pixelId) {
+      // Connects your website to your Facebook Ad Account
+      ReactPixel.init(pixelId);
+      // Tells Facebook someone landed on the website
+      ReactPixel.pageView(); 
+    } else {
+      console.warn("Meta Pixel ID is missing from .env file or Vercel Environment Variables");
+    }
+  }, []);
+
+  // Handle Button Clicks (Fires Lead Event & Opens Telegram)
+  const handleJoinClick = () => {
+    ReactPixel.track("Lead");
+    const telegramLink = import.meta.env.VITE_TELEGRAM_LINK;
+    if (telegramLink) {
+      window.open(telegramLink, "_blank");
+    } else {
+      console.error("Telegram Link is missing!");
+    }
+  };
 
   // Fetch live crypto prices
   useEffect(() => {
@@ -49,7 +63,7 @@ function App() {
     };
 
     fetchLivePrices(); // Initial fetch
-    const interval = setInterval(fetchLivePrices, 30000); 
+    const interval = setInterval(fetchLivePrices, 30000); // Update every 30 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -63,7 +77,7 @@ function App() {
             entry.target.classList.add("opacity-100", "translate-y-0");
             entry.target.classList.remove("opacity-0", "translate-y-16");
           } else {
-            // REMOVE classes when scrolled out of view (allowing it to reset)
+            // REMOVE classes when scrolled out of view
             entry.target.classList.remove("opacity-100", "translate-y-0");
             entry.target.classList.add("opacity-0", "translate-y-16");
           }
@@ -122,10 +136,10 @@ function App() {
             };
 
             requestAnimationFrame(animate);
-            observer.unobserve(node); 
+            observer.unobserve(node); // Stop observing once animated
           }
         },
-        { threshold: 0.5 }, 
+        { threshold: 0.5 }, // Triggers when 50% of the stat is visible
       );
 
       observer.observe(node);
@@ -147,9 +161,11 @@ function App() {
       <div className="w-full bg-slate-900/80 border-b border-primary/20 backdrop-blur-md overflow-hidden sticky top-0 z-50 py-2">
         <div className="flex whitespace-nowrap animate-ticker hover:animation-play-state-paused">
           <div className="flex items-center space-x-6 md:space-x-8 px-4 text-[10px] md:text-xs font-bold uppercase tracking-wider text-primary">
+            {/* We map the data twice to create an infinite seamless loop */}
             {[...tickerData, ...tickerData].map((coin, index) => (
               <span key={`${coin.id}-${index}`} className="flex items-center">
                 {coin.symbol}/USDT
+                {/* Dynamic Color for Positive/Negative Change */}
                 <span
                   className={`ml-1 ${coin.change >= 0 ? "text-green-400" : "text-red-400"}`}
                 >
@@ -192,7 +208,7 @@ function App() {
                 </span>
                 <span>LIVE CHANNEL</span>
               </div>
-              <h1 onClick={handleJoinClick} className="text-4xl sm:text-5xl lg:text-7xl font-extrabold mb-6 sm:mb-8 font-display leading-[1.2] sm:leading-[1.40]">
+              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold mb-6 sm:mb-8 font-display leading-[1.2] sm:leading-[1.40]">
                 नीचे क्लिक करके <br className="hidden sm:block" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400 drop-shadow-lg">
                   टेलीग्राम चैनल
@@ -200,14 +216,14 @@ function App() {
                 <br />
                 में ज्वाइन करें!
               </h1>
+              
+              {/* --- HERO BUTTON AREA (Fixed Animation & Full Width) --- */}
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start w-full mt-4 sm:mt-0">
                 <button
                   onClick={handleJoinClick}
                   className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white px-8 py-5 sm:px-10 rounded-2xl flex items-center justify-center gap-3 transition-all transform hover:scale-105 active:scale-95 glow-blue group relative overflow-hidden cursor-pointer"
                 >
-                  {/* Shiny sweep animation */}
                   <div className="absolute inset-0 bg-white/20 w-1/2 -skew-x-12 -translate-x-full group-hover:translate-x-[250%] transition-transform duration-700"></div>
-                  
                   <span className="material-icons-round text-xl sm:text-2xl group-hover:rotate-12 transition-transform">
                     rocket_launch
                   </span>
@@ -220,21 +236,18 @@ function App() {
 
             {/* Right Content Area */}
             <div className="lg:w-1/2 relative w-full max-w-lg sm:max-w-2xl mx-auto lg:max-w-none mt-12 lg:mt-0 group perspective-1000 scale-100 sm:scale-[1.10] origin-center">
-              {/* Breathing Background Glow */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100%] sm:w-[110%] aspect-square bg-gradient-to-tr from-primary/30 via-cyan-400/10 to-secondary/20 rounded-full blur-[80px] sm:blur-[120px] animate-pulse-slow z-0"></div>
 
-              {/* Floating Glassmorphic Display Frame */}
               <div className="relative z-10 animate-float transition-all duration-700 hover:scale-[1.05] hover:shadow-[0_0_70px_rgba(0,149,255,0.4)] p-1.5 sm:p-2 rounded-[2rem] sm:rounded-[3rem] bg-gradient-to-b from-white/10 via-white/5 to-transparent backdrop-blur-md">
-                {/* Inner Image Container */}
                 <div className="relative rounded-[1.8rem] sm:rounded-[2.5rem] overflow-hidden bg-slate-900/80 border border-white/10 shadow-2xl">
                   <img
                     alt="Hero Image"
                     className="w-full h-auto object-cover transform transition-transform duration-1000 group-hover:scale-105 opacity-100"
-                    src="/hero.png"
+                    src="/hero.webp"
+                    fetchPriority="high"
                   />
                 </div>
 
-                {/* Floating Badges */}
                 <div
                   className="absolute top-4 -right-2 sm:top-8 sm:-right-8 lg:-right-12 glass p-3 sm:p-5 rounded-2xl sm:rounded-3xl animate-float glow-blue z-30 border border-primary/30 backdrop-blur-xl "
                   style={{ animationDelay: "3s" }}
@@ -258,14 +271,13 @@ function App() {
                 </div>
               </div>
 
-              {/* Abstract background rings */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[115%] aspect-square border border-primary/20 rounded-full -z-10 animate-spin-slow opacity-60"></div>
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100%] aspect-square border border-dashed border-cyan-500/30 rounded-full -z-10 animate-spin-reverse-slow opacity-60"></div>
             </div>
           </div>
         </section>
 
-        {/* Stats Section with Scroll Counter Animation */}
+        {/* Stats Section */}
         <section className="border-y border-white/5 bg-slate-900/40 backdrop-blur-xl py-10 sm:py-12 relative z-20">
           <div className="container mx-auto px-4 sm:px-6 grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-center">
             <div>
@@ -319,10 +331,9 @@ function App() {
           </div>
           
           <div className="max-w-4xl mx-auto relative px-2 sm:px-4">
-            {/* THE MIDDLE LINE - Adapts to left side on mobile */}
             <div className="absolute left-6 lg:left-1/2 top-0 bottom-0 roadmap-line -translate-x-1/2 opacity-30 z-0"></div>
 
-            {/* Phase 01: Join Telegram */}
+            {/* Phase 01 */}
             <div className="reveal-on-scroll opacity-0 translate-y-16 transition-all duration-1000 ease-out relative flex items-center justify-between mb-12 sm:mb-16 flex-col lg:flex-row z-10">
               <div className="w-full pl-14 lg:pl-0 lg:w-[45%] mb-4 lg:mb-0">
                 <div className="glass p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-primary/20 relative group hover:border-primary/60 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(0,149,255,0.15)] bg-slate-900/50 backdrop-blur-xl">
@@ -347,7 +358,7 @@ function App() {
               <div className="hidden lg:block lg:w-[45%]"></div>
             </div>
 
-            {/* Phase 02: Market Tips */}
+            {/* Phase 02 */}
             <div className="reveal-on-scroll opacity-0 translate-y-16 transition-all duration-1000 ease-out delay-100 relative flex items-center justify-between mb-12 sm:mb-16 flex-col lg:flex-row z-10">
               <div className="hidden lg:block lg:w-[45%]"></div>
               <div className="absolute left-6 lg:left-1/2 -translate-x-1/2 bg-slate-900 border-2 border-secondary glow-gold p-3 sm:p-4 rounded-full z-20 transition-transform duration-300 hover:scale-110">
@@ -372,7 +383,7 @@ function App() {
               </div>
             </div>
 
-            {/* Phase 03: Growth */}
+            {/* Phase 03 */}
             <div className="reveal-on-scroll opacity-0 translate-y-16 transition-all duration-1000 ease-out delay-200 relative flex items-center justify-between flex-col lg:flex-row z-10">
               <div className="w-full pl-14 lg:pl-0 lg:w-[45%] mb-4 lg:mb-0">
                 <div className="glass p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-primary/20 relative group hover:border-primary/60 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(0,149,255,0.15)] bg-slate-900/50 backdrop-blur-xl">
@@ -403,7 +414,7 @@ function App() {
         <section className="container mx-auto pt-16 pb-24 sm:pb-32 px-4 sm:px-6 relative z-20">
           <div className="relative rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden bg-[#050a18] border border-white/5 shadow-2xl backdrop-blur-3xl group transition-all duration-500 hover:border-primary/40">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,149,255,0.08),transparent_50%)]"></div>
-            <div onClick={handleJoinClick} className="relative z-10 p-6 sm:p-10 md:p-14 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10">
+            <div className="relative z-10 p-6 sm:p-10 md:p-14 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10">
               {/* Left Side (Text) */}
               <div className="lg:w-7/12 text-center lg:text-left relative w-full">
                 <h2 className="text-2xl sm:text-3xl md:text-5xl font-black mb-4 sm:mb-5 text-white relative z-10">
@@ -429,16 +440,18 @@ function App() {
                 </div>
               </div>
 
-              {/* Right Side (Button) */}
-              <div 
-                onClick={handleJoinClick}
-                className="lg:w-5/12 flex flex-col items-center lg:items-end w-full relative z-20 cursor-pointer group"
-              >
-                <button className="w-full sm:w-auto bg-cyan-500 text-[#020617] px-4 py-4 sm:px-12 sm:py-5 rounded-xl flex items-center justify-center gap-2 sm:gap-4 transition-all transform group-hover:scale-[1.03] group-hover:bg-cyan-400 shadow-[0_0_30px_rgba(0,212,255,0.3)] pointer-events-none sm:pointer-events-auto">
-                  <span className="material-icons-round text-xl sm:text-3xl shrink-0">
+              {/* --- CTA BUTTON AREA (Fixed Animation & Full Width) --- */}
+              <div className="lg:w-5/12 flex flex-col items-center lg:items-end w-full relative z-20">
+                <button
+                  onClick={handleJoinClick}
+                  className="w-full sm:w-auto bg-cyan-500 text-[#020617] hover:bg-cyan-400 px-6 py-5 sm:px-12 rounded-xl flex items-center justify-center gap-2 sm:gap-4 transition-all transform hover:scale-[1.03] active:scale-95 shadow-[0_0_30px_rgba(0,212,255,0.3)] group relative overflow-hidden cursor-pointer"
+                >
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out z-0"></div>
+                  
+                  <span className="material-icons-round text-2xl sm:text-3xl shrink-0 group-hover:-rotate-12 transition-transform relative z-10">
                     telegram
                   </span>
-                  <span className="text-[13px] sm:text-lg font-bold uppercase tracking-widest whitespace-nowrap">
+                  <span className="text-[14px] sm:text-lg font-bold uppercase tracking-widest whitespace-nowrap relative z-10">
                     Access Private Channel
                   </span>
                 </button>
