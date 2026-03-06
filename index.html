@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html class="dark" lang="hi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Telegram Community</title>
+    <link rel="icon" type="image/webp" href="./public/telegram.webp" />
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Noto+Sans+Devanagari:wght@400;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+      tailwind.config = {
+          darkMode: "class",
+          theme: {
+              extend: {
+                  colors: {
+                      primary: "#0095FF",
+                      secondary: "#FFD700",
+                      "background-light": "#f8fafc",
+                      "background-dark": "#020617",
+                      "card-dark": "#0f172a",
+                  },
+                  fontFamily: {
+                      display: ["Inter", "Noto Sans Devanagari", "sans-serif"],
+                      body: ["Inter", "sans-serif"],
+                  },
+                  animation: {
+                      'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                      'float': 'float 6s ease-in-out infinite',
+                      'ticker': 'ticker 30s linear infinite',
+                      'spin-slow': 'spin 8s linear infinite',
+                      'spin-reverse-slow': 'spin-reverse 10s linear infinite',
+                  },
+                  keyframes: {
+                      float: {
+                          '0%, 100%': { transform: 'translateY(0)' },
+                          '50%': { transform: 'translateY(-20px)' },
+                      },
+                      ticker: {
+                          '0%': { transform: 'translateX(0)' },
+                          '100%': { transform: 'translateX(-50%)' },
+                      },
+                      'spin-reverse': {
+                          '0%': { transform: 'rotate(0deg)' },
+                          '100%': { transform: 'rotate(-360deg)' },
+                      }
+                  }
+              },
+          },
+      };
+    </script>
+  </head>
+  <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white transition-colors duration-300">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
