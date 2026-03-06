@@ -424,6 +424,7 @@ function App() {
                     src="/arrow.webp"
                     alt="Arrow"
                     className="w-full h-auto opacity-70 invert drop-shadow-[0_0_15px_rgba(0,212,255,0.4)] animate-arrow-flow"
+                    loading="lazy"
                   />
                 </div>
               </div>
