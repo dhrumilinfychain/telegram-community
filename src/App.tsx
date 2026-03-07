@@ -17,24 +17,55 @@ function App() {
 
   // --- NEW: INITIALIZE META (FACEBOOK) PIXEL ON PAGE LOAD ---
   useEffect(() => {
-    const pixelId = import.meta.env.VITE_META_PIXEL_ID;
-    
-    if (pixelId) {
-      // Connects your website to your Facebook Ad Account
-      ReactPixel.init(pixelId);
-      // Tells Facebook someone landed on the website
-      ReactPixel.pageView(); 
-    } else {
-      console.warn("Meta Pixel ID is missing from .env file or Vercel Environment Variables");
-    }
+    let isMounted = true;
+    const abortController = new AbortController();
+    const fetchLivePrices = async () => {
+      if (document.hidden) return;
+      try {
+        const ids = tickerData.map((coin) => coin.id).join(",");
+        const res = await fetch(
+          `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`,
+          { signal: abortController.signal },
+        );
+
+        const data = await res.json();
+        if (isMounted) {
+          setTickerData((prevData) =>
+            prevData.map((coin) => ({
+              ...coin,
+              price: data[coin.id]?.usd || coin.price,
+              change: data[coin.id]?.usd_24h_change || coin.change,
+            })),
+          );
+        }
+      } catch (error: any) {
+        if (error.name !== "AbortError") {
+          console.error("Failed to fetch live crypto prices:", error);
+        }
+      }
+    };
+
+    const initialDelay = setTimeout(() => {
+      fetchLivePrices();
+    }, 1500);
+    const interval = setInterval(fetchLivePrices, 30000);
+
+    return () => {
+      isMounted = false;
+      abortController.abort();
+      clearTimeout(initialDelay);
+      clearInterval(interval);
+    };
   }, []);
 
   // Handle Button Clicks (Fires Lead Event & Opens Telegram)
-  const handleJoinClick = () => {
+  const handleJoinClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e) e.preventDefault();
     ReactPixel.track("Lead");
     const telegramLink = import.meta.env.VITE_TELEGRAM_LINK;
+
     if (telegramLink) {
-      window.open(telegramLink, "_blank");
+      window.open(telegramLink, "_blank", "noopener,noreferrer");
     } else {
       console.error("Telegram Link is missing!");
     }
@@ -195,12 +226,11 @@ function App() {
 
       {/* Main Container - Added overflow-x-hidden to prevent mobile horizontal scroll */}
       <main className="relative z-10 overflow-x-hidden">
-        
         {/* Hero Section */}
         <section className="container mx-auto px-4 sm:px-6 pt-16 pb-20 md:pt-24 md:pb-32">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
             {/* Left Content Area (Text & Buttons) */}
-            <div  onClick={handleJoinClick} className="lg:w-1/2 text-center lg:text-left">
+            <div className="lg:w-1/2 text-center lg:text-left">
               <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary border border-primary/20 px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-6 sm:mb-8 shadow-[0_0_15px_rgba(0,149,255,0.2)]">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -216,15 +246,22 @@ function App() {
                 <br />
                 में जॉइन करें!
               </h1>
-              
+
               {/* --- HERO BUTTON AREA (Fixed Animation & Full Width) --- */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start w-full mt-4 sm:mt-0">
-                <button
-                  onClick={handleJoinClick}
-                  className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white px-8 py-5 sm:px-10 rounded-2xl flex items-center justify-center gap-3 transition-all transform hover:scale-105 active:scale-95 glow-blue group relative overflow-hidden cursor-pointer"
-                >
+              <div
+                onClick={handleJoinClick}
+                /* CHANGED: sm:w-auto is now sm:w-max */
+                className="relative w-full sm:w-max cursor-pointer group mt-8 sm:mt-0"
+              >
+                {/* The invisible expanded clickable area (-inset-4 expands it 16px outwards) */}
+                <div className="absolute -inset-4 z-0 rounded-3xl"></div>
+
+                {/* The actual visual button */}
+                <button className="relative z-10 w-full sm:w-auto bg-[#0095ff] hover:bg-[#0095ff]/90 text-white px-8 py-4 sm:px-10 rounded-2xl flex items-center justify-center gap-3 transition-all transform group-hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(0,149,255,0.4)] overflow-hidden pointer-events-none">
+                  {/* Shine effect */}
                   <div className="absolute inset-0 bg-white/20 w-1/2 -skew-x-12 -translate-x-full group-hover:translate-x-[250%] transition-transform duration-700"></div>
-                  <span className="material-icons-round text-xl sm:text-2xl group-hover:rotate-12 transition-transform">
+
+                  <span className="material-icons-round text-xl sm:text-2xl transition-transform group-hover:rotate-12">
                     rocket_launch
                   </span>
                   <span className="text-lg sm:text-xl font-bold tracking-wide">
@@ -329,12 +366,12 @@ function App() {
               the ecosystem.
             </p>
           </div>
-          
+
           <div className="max-w-4xl mx-auto relative px-2 sm:px-4">
             <div className="absolute left-6 lg:left-1/2 top-0 bottom-0 roadmap-line -translate-x-1/2 opacity-30 z-0"></div>
 
             {/* Phase 01 */}
-            <div className="reveal-on-scroll opacity-0 translate-y-16 transition-all duration-1000 ease-out relative flex items-center justify-between mb-12 sm:mb-16 flex-col lg:flex-row z-10">
+            <div className="reveal-on-scroll opacity-0 translate-y-16 transition-[opacity,transform] duration-1000 ease-out relative flex items-center justify-between mb-12 sm:mb-16 flex-col lg:flex-row z-10">
               <div className="w-full pl-14 lg:pl-0 lg:w-[45%] mb-4 lg:mb-0">
                 <div className="glass p-6 sm:p-8 rounded-[24px] sm:rounded-[32px] border border-primary/20 relative group hover:border-primary/60 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(0,149,255,0.15)] bg-slate-900/50 backdrop-blur-xl">
                   <span className="text-primary text-[9px] sm:text-[10px] font-bold tracking-widest uppercase block text-left lg:text-right mb-2">
@@ -414,7 +451,7 @@ function App() {
         <section className="container mx-auto pt-16 pb-24 sm:pb-32 px-4 sm:px-6 relative z-20">
           <div className="relative rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden bg-[#050a18] border border-white/5 shadow-2xl backdrop-blur-3xl group transition-all duration-500 hover:border-primary/40">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,149,255,0.08),transparent_50%)]"></div>
-            <div  onClick={handleJoinClick} className="relative z-10 p-6 sm:p-10 md:p-14 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10">
+            <div className="relative z-10 p-6 sm:p-10 md:p-14 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10">
               {/* Left Side (Text) */}
               <div className="lg:w-7/12 text-center lg:text-left relative w-full">
                 <h2 className="text-2xl sm:text-3xl md:text-5xl font-black mb-4 sm:mb-5 text-white relative z-10">
@@ -442,19 +479,28 @@ function App() {
 
               {/* --- CTA BUTTON AREA (Fixed Animation & Full Width) --- */}
               <div className="lg:w-5/12 flex flex-col items-center lg:items-end w-full relative z-20">
-                <button
+                {/* NEW INNER WRAPPER: Handles the expanded clickable area */}
+                <div
                   onClick={handleJoinClick}
-                  className="w-full sm:w-auto bg-cyan-500 text-[#020617] hover:bg-cyan-400 px-6 py-5 sm:px-12 rounded-xl flex items-center justify-center gap-2 sm:gap-4 transition-all transform hover:scale-[1.03] active:scale-95 shadow-[0_0_30px_rgba(0,212,255,0.3)] group relative overflow-hidden cursor-pointer"
+                  className="relative w-full sm:w-auto cursor-pointer group"
                 >
-                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out z-0"></div>
-                  
-                  <span className="material-icons-round text-2xl sm:text-3xl shrink-0 group-hover:-rotate-12 transition-transform relative z-10">
-                    telegram
-                  </span>
-                  <span className="text-[14px] sm:text-lg font-bold uppercase tracking-widest whitespace-nowrap relative z-10">
-                    Access Private Channel
-                  </span>
-                </button>
+                  {/* The invisible expanded clickable area (-inset-5 expands it ~20px outwards) */}
+                  <div className="absolute -inset-5 z-0 rounded-[2rem]"></div>
+
+                  {/* The actual visual button */}
+                  <button className="relative z-10 w-full sm:w-auto bg-cyan-500 text-[#020617] hover:bg-cyan-400 px-6 py-5 sm:px-12 rounded-xl flex items-center justify-center gap-2 sm:gap-4 transition-all transform group-hover:scale-[1.03] active:scale-95 shadow-[0_0_30px_rgba(0,212,255,0.3)] overflow-hidden pointer-events-none">
+                    {/* Shine effect */}
+                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out z-0"></div>
+
+                    <span className="material-icons-round text-2xl sm:text-3xl shrink-0 group-hover:-rotate-12 transition-transform relative z-10">
+                      telegram
+                    </span>
+
+                    <span className="text-[14px] sm:text-lg font-bold uppercase tracking-widest whitespace-nowrap relative z-10">
+                      Access Private Channel
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
