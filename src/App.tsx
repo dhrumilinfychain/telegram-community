@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import "./App.css";
-import ReactPixel from "react-facebook-pixel";
 
 function App() {
   // Live Crypto Ticker State
@@ -61,7 +60,12 @@ function App() {
   // Handle Button Clicks (Fires Lead Event & Opens Telegram)
   const handleJoinClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e) e.preventDefault();
-    ReactPixel.track("Lead");
+    
+    // Trigger native Meta Pixel event
+    if (typeof window !== "undefined" && (window as any).fbq) {
+      (window as any).fbq("track", "Lead");
+    }
+
     const telegramLink = import.meta.env.VITE_TELEGRAM_LINK;
 
     if (telegramLink) {
