@@ -60,7 +60,7 @@ function App() {
   // Handle Button Clicks (Fires Lead Event & Opens Telegram)
   const handleJoinClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e) e.preventDefault();
-    
+
     // Trigger native Meta Pixel event
     if (typeof window !== "undefined" && (window as any).fbq) {
       (window as any).fbq("track", "Lead");
@@ -283,8 +283,8 @@ function App() {
                 <div className="relative rounded-[1.8rem] sm:rounded-[2.5rem] overflow-hidden bg-slate-900/80 border border-white/10 shadow-2xl">
                   <img
                     alt="Hero Image"
-                    className="w-full h-auto object-cover transform transition-transform duration-1000 group-hover:scale-105 opacity-100"
-                    src="/hero.png"
+                    className="w-full h-full object-cover transform transition-transform duration-1000 opacity-100"
+                    src="/banner.png"
                     fetchPriority="high"
                   />
                 </div>
